@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_landlord_landlord,landlord.landlord,model_landlord_landlord,,1,1,1,1
+access_credit_fund,credit.fund,model_credit_fund,,1,1,1,1
+access_fund_wizard,fund.wizard,model_fund_wizard,,1,1,1,1

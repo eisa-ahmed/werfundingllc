@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_res_config_settings_inherit" model="ir.ui.view">
+            <field name="name">res.config.settings.vicidial.inherit</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='integration']" position="after">
+                    <h2>Vicidial Settings</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <!-- Vicidial API URL -->
+                        <div class="col-12 col-lg-6 o_setting_box" id="vicidial_api_url_setting">
+                            <div class="o_setting_right_pane">
+                                <p class="w-auto pl-1 font-weight-bold">Vicidial API URL</p>
+                                <field name="vicidial_api_url"/>
+                            </div>
+                        </div>
+
+                        <!-- Vicidial API Login -->
+                        <div class="col-12 col-lg-6 o_setting_box" id="vicidial_api_login_setting">
+                            <div class="o_setting_right_pane">
+                                <p class="w-auto pl-1 font-weight-bold">Vicidial API Login</p>
+                                <field name="vicidial_api_login"/>
+                            </div>
+                        </div>
+
+                        <!-- Vicidial API Password -->
+                        <div class="col-12 col-lg-6 o_setting_box" id="vicidial_api_password_setting">
+                            <div class="o_setting_right_pane">
+                                <p class="w-auto pl-1 font-weight-bold">Vicidial API Password</p>
+                                <field name="vicidial_api_password"/>
+                            </div>
+                        </div>
+
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

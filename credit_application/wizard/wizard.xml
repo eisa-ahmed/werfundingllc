@@ -1,0 +1,53 @@
+<odoo>
+    <data>
+        <record id="fund_wizard_form" model="ir.ui.view">
+            <field name="name">fund.wizard.form</field>
+            <field name="model">fund.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <div>
+                        <p style="font-size: 1.2rem;">On Pressing Send, <b>Contact Emails specified for Selected Funds
+                        </b> will receive the Credit Application
+                            along with the selected options for attachments via email.
+                        </p>
+                    </div>
+                    <br/>
+                    <group>
+                        <group>
+                            <field name="in_house"/>
+                        </group>
+                        <group>
+                            <field name="external"/>
+                        </group>
+                    </group>
+                    <group string="Attachment Options">
+                        <br/>
+                        <br/>
+                        <group>
+                            <field name="applications"/>
+                            <field name="doc_ids"/>
+                            <field name="ar_reports"/>
+                            <field name="proof_ein"/>
+                        </group>
+                        <group>
+                            <field name="bank_statement"/>
+                            <field name="voided_checks"/>
+                            <field name="credit_card_statements"/>
+                            <field name="miscellaneous"/>
+                        </group>
+                    </group>
+                    <br/>
+                    <group string="Funders" groups="credit_application.group_send_funders">
+                        <field name="fund_ids" widget="many2many_checkboxes" options="{'no_create': True}" string="Funders"/>
+                    </group>
+                    <br/>
+                    <footer>
+                        <button string="Send" type="object" class="btn-primary" name="action_send_mail_funds"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

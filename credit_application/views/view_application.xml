@@ -1,0 +1,263 @@
+<odoo>
+    <data>
+        <record id="view_credit_application_tree" model="ir.ui.view">
+            <field name="name">crm.lead.credit.application.tree</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <tree string="Credit Applications" sample="1">
+                    <field name="app_id" decoration-bf="1" string="App Id"/>
+                    <field name="user_id" string="Funding Specialist" optional="show" widget="many2one_avatar_user"/>
+                    <field name="name" decoration-bf="1"/>
+                    <field name="legal_entity"/>
+                    <field name="industry" optional="show"/>
+                    <field name="vat" optional="hide"/>
+                    <field name="city" optional="show"/>
+                    <field name="state_id" optional="hide"/>
+                    <field name="phone" optional="show"/>
+                    <field name="website" optional="hide"/>
+                    <field name="avg_monthly_revenue" optional="show"/>
+                    <field name="requested_financing_amount" optional="show"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_credit_application_form" model="ir.ui.view">
+            <field name="name">crm.lead.credit.application.form</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <form string="Credit Application">
+                    <header>
+                        <button string="Send to Funders" type="object" name="action_open_wizard" class="oe_highlight" groups="credit_application.group_send_funders"/>
+                        <button string="Submit App" type="object" name="action_submit_application" class="oe_highlight" groups="credit_application.group_submit_app"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Legal Company Name"/>
+                            </h1>
+                        </div>
+                        <br/>
+                        <group>
+                            <group>
+                                <field name="user_company_ids" invisible="1"/>
+                                <field name="app_id" string="App Id" readonly="1" force_save="1"/>
+                                <field name="user_id" widget="many2one_avatar_user" string="Funding Specialist"/>
+                                <field name="company_currency" invisible="1"/>
+                                <field name="website" widget="url" placeholder="e.g. https://www.werfunding.com"/>
+                                <field name="industry"/>
+                                <label for="incorporation_state_id"/>
+                                <div name="name_div" class="d-flex">
+                                    <field name="incorporation_state_id"/>
+                                    <span class="oe_inline o_form_label mx-3"/>
+                                    <field name="vat" placeholder="Tax ID"/>
+                                </div>
+                                <field name="legal_entity" widget="radio"/>
+                            </group>
+                            <group>
+                                <field name="street" placeholder="Street" class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State"
+                                       options="{'no_open': True, 'no_quick_create': True}"
+                                       context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country"
+                                       options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                                <field name="business_start_date"/>
+                                <field name="phone" string="Business Phone"/>
+                            </group>
+                        </group>
+                        <br/>
+                        <group>
+                            <group>
+                                <field name="avg_monthly_revenue"/>
+                                <field name="credit_card_processing"/>
+                                <field name="requested_financing_amount"/>
+                                <field name="use_of_funds"/>
+                                <field name="existing_loan_advance"/>
+                                <field name="no_loan_advance"
+                                       attrs="{'invisible': [('existing_loan_advance', '!=', 'yes')]}"/>
+                                <field name="total_balance"/>
+                            </group>
+                            <group>
+                                <field name="own_rent_loc"/>
+                                <label for="monthly_rent_mortgage" string="Monthly Rent"
+                                       attrs="{'invisible': [('own_rent_loc', '!=', 'rent')]}"/>
+                                <label for="monthly_rent_mortgage" string="Monthly Mortgage"
+                                       attrs="{'invisible': [('own_rent_loc', '!=', 'own')]}"/>
+                                <field name="monthly_rent_mortgage" nolabel="1"/>
+                                <field name="landlord_id" attrs="{'invisible': [('own_rent_loc', '!=', 'rent')]}"/>
+                                <field name="landlord_phone" attrs="{'invisible': [('own_rent_loc', '!=', 'rent')]}"/>
+                                <field name="bank_id" attrs="{'invisible': [('own_rent_loc', '!=', 'own')]}"/>
+                                <field name="bank_phone" attrs="{'invisible': [('own_rent_loc', '!=', 'own')]}"/>
+                            </group>
+                        </group>
+                        <br/>
+                        <notebook>
+                            <page string="Business Owners" name="business_owners">
+                                <field name="business_owner_ids"
+                                       domain="[('credit_application_id', '=', False)]">
+                                    <tree>
+                                        <field name="name" decoration-bf="1"/>
+                                        <field name="last_name" optional="hide"/>
+                                        <field name="mobile" optional="show"/>
+                                        <field name="email" optional="show"/>
+                                        <field name="city" optional="show"/>
+                                        <field name="state_id" optional="show"/>
+                                        <field name="country_id" optional="hide"/>
+                                        <field name="birth_date" optional="hide"/>
+                                        <field name="credit_score_estimate" optional="show" width="10"/>
+                                        <field name="social_security_no" optional="hide"/>
+                                        <field name="ownership_percent" optional="show" string="% Ownership"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <group string="Personal Details">
+                                                <label for="name"/>
+                                                <div name="name_div" class="d-flex">
+                                                    <field name="name" placeholder="First"/>
+                                                    <span class="oe_inline o_form_label mx-3"/>
+                                                    <field name="last_name" placeholder="Last"/>
+                                                </div>
+                                                <field name="birth_date"/>
+                                                <field name="mobile" widget="phone"/>
+                                                <field name="email" widget="email"/>
+                                                <field name="social_security_no"/>
+                                            </group>
+                                            <group string="Contact Information">
+                                                <field name="street" placeholder="Street" class="o_address_street"/>
+                                                <field name="city" placeholder="City" class="o_address_city"/>
+                                                <field name="state_id" class="o_address_state" placeholder="State"
+                                                       options="{'no_open': True, 'no_quick_create': True}"
+                                                       context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+                                                <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                                <field name="country_id" placeholder="Country" class="o_address_country"
+                                                       options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                                            </group>
+                                            <group string="Business Affiliation Details">
+                                                <field name="ownership_percent"/>
+                                                <field name="credit_score_estimate"/>
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Signatures" name="signature">
+                                <group>
+                                    <group>
+                                        <field name="sign_1" string="Sign (1)"/>
+                                    </group>
+                                    <group>
+                                        <field name="sign_2" string="Sign (2)"/>
+                                    </group>
+                                </group>
+                                <br/>
+                                <group>
+                                    <group>
+                                        <field name="title_1" string="Title (1)"/>
+                                        <field name="date_1" string="Date (1)"/>
+                                    </group>
+                                    <group>
+                                        <field name="title_2" string="Title (2)"/>
+                                        <field name="date_2" string="Date (2)"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Attachments" name="attachments">
+                                <br/>
+                                <group>
+                                    <group>
+                                        <field name="attachment_application_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+
+                                    <group>
+                                        <field name="attachment_bank_statements_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+                                </group>
+                                <br/>
+                                <group>
+                                    <group>
+                                        <field name="attachment_id_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+
+                                    <group>
+                                        <field name="attachment_voided_check_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+                                </group>
+                                <br/>
+                                <group>
+                                    <group>
+                                        <field name="attachment_ar_report_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+
+                                    <group>
+                                        <field name="attachment_credit_card_statements_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+                                </group>
+                                <br/>
+                                <group>
+                                    <group>
+                                        <field name="attachment_proof_of_ein_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+
+                                    <group>
+                                        <field name="attachment_misc_ids" widget="many2many_binary"
+                                               options="{'no_create': True}"/>
+                                    </group>
+                                </group>
+                                <br/>
+                            </page>
+                            <page name="description_page" string="Notes">
+                                <field name="additional_notes" type="html"
+                                       options="{'collaborative': true, 'resizable': false}"
+                                       placeholder="Additional Notes... These will be auto populated in the Email Body to the Funders"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_credit_application_search" model="ir.ui.view">
+            <field name="name">crm.lead.credit.application.search</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="app_id" string="App Id"/>
+                    <field name="name" string="Legal Name"/>
+                    <field name="website"/>
+                    <field name="industry"/>
+                    <field name="vat"/>
+                    <field name="legal_entity"/>
+                    <field name="city"/>
+                    <field name="state_id"/>
+                    <field name="phone" string="Business Phone"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Application Action -->
+
+        <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
+            <field name="view_mode">kanban,tree,graph,pivot,form,calendar,activity</field>
+            <field name="search_view_id" ref="view_credit_application_search"/>
+            <field name="view_ids"
+                   eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'kanban', 'view_id': ref('crm.crm_case_kanban_view_leads')}),
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('credit_application.view_credit_application_tree')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('credit_application.view_credit_application_form')})]"/>
+        </record>
+
+    </data>
+</odoo>

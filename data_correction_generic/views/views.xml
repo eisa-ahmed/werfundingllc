@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="data_correct_form_id" model="ir.ui.view">
+        <field name="name">data_correct_form_id</field>
+        <field name="model">data.correct</field>
+        <field name="arch" type="xml">
+            <form create='false' delete='false'>
+                <header>
+                    <button name="run_python_code" type="object" string="Run Python Code"/>
+                    <button name="run_sql_querry" type="object" string="Run SQL Querry"/>
+                </header>
+                <sheet>
+                    <group string="Purpose">
+                        <field name="purpose" string="Purpose"/>
+                    </group>
+                    <group string="Python Code">
+                        <field name="python_code" widget="ace"/>
+                    </group>
+                    <group string="SQL Querry">
+                        <field name="field_querry"/>
+                    </group>
+                    <group string="Result">
+                        <field name="result"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="data_correct_form_tree" model="ir.ui.view">
+        <field name="name">data_correct_form_tree</field>
+        <field name="model">data.correct</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id"/>
+                <field name="purpose"/>
+                <field name="field_querry"/>
+                <field name="result"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="data_correct_action">
+        <field name="name">Data Correct</field>
+        <field name="res_model">data.correct</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="data_correct_main_menu"
+              name="Data Correct"
+              parent="base.menu_administration"/>
+    <menuitem id="data_correct_menu"
+              name="Data Correct"
+              action="data_correct_action"
+              parent="data_correct_main_menu"
+              sequence="50"/>
+</odoo> 
