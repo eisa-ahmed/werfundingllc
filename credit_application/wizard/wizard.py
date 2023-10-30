@@ -87,7 +87,7 @@ class FundWizard(models.TransientModel):
         attachment_ids = self.gather_attachment_ids(self.credit_application_id)
 
         if not self.env.context.get('app_submission', False):
-            body = ''
+            message_body = ''
             for fund in self.fund_ids:
                 email_cc = ', '.join(fund.contact_ids.mapped('email'))
                 mail_values = {
@@ -106,12 +106,12 @@ class FundWizard(models.TransientModel):
                 # Create an unordered list of names with HTML line breaks
                 names = fund.contact_ids.mapped('name')
                 for name in names:
-                    body += '<li>%s</li>' % name
+                    message_body += '<li>%s</li>' % name
 
             # Post a message in the chatter with line breaks
-            if body:
-                body = f'Application Submitted at <b>{fields.Datetime.now()}</b> to Funders:<br/><br/><ul>' + body + '</ul><br/>'
-                self.credit_application_id.message_post(body=body)
+            if message_body:
+                message_body = f'Application Submitted at <b>{fields.Datetime.now()}</b> to Funders:<br/><br/><ul>' + message_body + '</ul><br/>'
+                self.credit_application_id.message_post(body=message_body)
 
         else:
             mail_values = {
