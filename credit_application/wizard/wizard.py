@@ -87,6 +87,7 @@ class FundWizard(models.TransientModel):
         attachment_ids = self.gather_attachment_ids(self.credit_application_id)
 
         if not self.env.context.get('app_submission', False):
+            body = ''
             for fund in self.fund_ids:
                 email_cc = ', '.join(fund.contact_ids.mapped('email'))
                 mail_values = {
@@ -95,21 +96,29 @@ class FundWizard(models.TransientModel):
                     'email_from': 'submissions@werfundingllc.com',
                     'email_to': fund.email,
                     'email_cc': email_cc,
-                    'model': 'crm.lead',
-                    'res_id': self.credit_application_id.id,
+                    'reply_to': 'submissions@werfundingllc.com'
                 }
 
                 mail = Mail.create(mail_values)
                 mail.unrestricted_attachment_ids = [(6, 0, attachment_ids)]
                 mail.send()
+
+                # Create an unordered list of names with HTML line breaks
+                names = fund.contact_ids.mapped('name')
+                for name in names:
+                    body += '<li>%s</li>' % name
+
+            # Post a message in the chatter with line breaks
+            if body:
+                body = f'Application Submitted at <b>{fields.Datetime.now()}</b> to Funders:<br/><br/><ul>' + body + '</ul><br/>'
+                self.credit_application_id.message_post(body=body)
+
         else:
             mail_values = {
                 'subject': subject,
                 'body_html': body,
                 'email_from': self.env.user.email,
-                'email_to': 'submissions@werfundingllc.com',
-                'model': 'crm.lead',
-                'res_id': self.credit_application_id.id,
+                'email_to': 'submissions@werfundingllc.com'
             }
 
             mail = Mail.create(mail_values)
