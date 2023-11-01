@@ -27,6 +27,7 @@ class ResPartnerInherit(models.Model):
     birth_date = fields.Date(string='Date of Birth')
     fake_email = fields.Char(string='Fake Email')
     fake_phone = fields.Char(string='Fake Phone')
+    state_id = fields.Many2one(domain=[('country_id.code', '=', 'US')])
 
     @api.constrains('ownership_percent')
     def _check_ownership_percent(self):
@@ -70,7 +71,7 @@ class CreditApplication(models.Model):
         ('sole_prop', 'Sole Prop.')
     ], string='Legal Entity', tracking=True)
     city = fields.Char(string="City", tracking=True)
-    state_id = fields.Many2one('res.country.state', string="State", tracking=True)
+    state_id = fields.Many2one('res.country.state', string="State", tracking=True, domain=[('country_id.code', '=', 'US')])
     zip = fields.Char(tracking=True)
     country_id = fields.Many2one('res.country', string="Country", tracking=True)
     business_start_date = fields.Date(string='Business Start Date', tracking=True)
@@ -131,6 +132,30 @@ class CreditApplication(models.Model):
     date_1 = fields.Date()
     date_2 = fields.Date()
 
+    # Fields added the first time
+    name1 = fields.Char(string='Name (1)')
+    birth_date1 = fields.Date(string='Date of Birth (1)')
+    mobile1 = fields.Char(string='Mobile (1)')
+    email1 = fields.Char(string='Email (1)')
+    social_security_no1 = fields.Char(string='Social Security No (1)')
+    city1 = fields.Char(string='City (1)')
+    state_id1 = fields.Many2one('res.country.state', string='State (1)')
+    zip1 = fields.Char(string='ZIP (1)')
+    ownership_percent1 = fields.Float(string='% Ownership (1)')
+    credit_score_estimate1 = fields.Integer(string='Credit Score (Estimate) (1)')
+
+    # Fields added the second time
+    name2 = fields.Char(string='Name (2nd)')
+    birth_date2 = fields.Date(string='Date of Birth (2nd)')
+    mobile2 = fields.Char(string='Mobile (2nd)')
+    email2 = fields.Char(string='Email (2nd)')
+    social_security_no2 = fields.Char(string='Social Security No (2nd)')
+    city2 = fields.Char(string='City (2nd)')
+    state_id2 = fields.Many2one('res.country.state', string='State (2nd)')
+    zip2 = fields.Char(string='ZIP (2nd)')
+    ownership_percent2 = fields.Float(string='% Ownership (2nd)')
+    credit_score_estimate2 = fields.Integer(string='Credit Score (Estimate) (2nd)')
+
     def action_open_wizard(self):
         return {
             'name': 'Send to Funds',
@@ -168,11 +193,72 @@ class CreditApplication(models.Model):
                     'partner_id': user.partner_id.id
                 })
 
+    def create_business_owners(self, vals):
+        # Separate the values for the first set of fields (ending with "1") and the second set (ending with "2")
+        vals_1 = {}
+        vals_2 = {}
+        partner_ids = list()
+        for key, value in vals.items():
+            if key not in ('sign_1', 'sign_2', 'date_1', 'date_2', 'title_1', 'title_2'):
+                if key.endswith('1'):
+                    vals_1[key[:-1]] = value  # Remove the "1" suffix
+                elif key.endswith('2'):
+                    vals_2[key[:-1]] = value  # Remove the "2" suffix
+
+        # Create a res.partner record based on the values from the first set of fields
+        if vals_1:
+            partner_vals = {
+                'name': vals_1.get('name1'),
+                'birth_date': vals_1.get('birth_date1'),
+                'mobile': vals_1.get('mobile1'),
+                'email': vals_1.get('email1'),
+                'zip': vals_1.get('zip1'),
+                'social_security_no': vals_1.get('social_security_no1'),
+                'city': vals_1.get('city1'),
+                'state_id': vals_1.get('state_id1') if vals_1.get('state_id1') else False,
+                'ownership_percent': vals_1.get('ownership_percent1'),
+                'credit_score_estimate': vals_1.get('credit_score_estimate1'),
+            }
+            partner = self.env['res.partner'].create(partner_vals)
+            partner_ids.append(partner.id)
+
+            # Clear the values from the crm.lead record for the first set of fields
+            for key in vals_1.keys():
+                if key in vals:
+                    del vals[key]
+
+        # Create a res.partner record based on the values from the second set of fields
+        if vals_2:
+            partner_vals = {
+                'name': vals_2.get('name2'),
+                'birth_date': vals_2.get('birth_date2'),
+                'mobile': vals_2.get('mobile2'),
+                'email': vals_2.get('email2'),
+                'zip': vals_2.get('zip2'),
+                'social_security_no': vals_2.get('social_security_no2'),
+                'city': vals_2.get('city2'),
+                'state_id': vals_2.get('state_id2') if vals_2.get('state_id2') else False,
+                'ownership_percent': vals_2.get('ownership_percent2'),
+                'credit_score_estimate': vals_2.get('credit_score_estimate2'),
+            }
+            partner = self.env['res.partner'].create(partner_vals)
+            partner_ids.append(partner.id)
+
+            # Clear the values from the crm.lead record for the second set of fields
+            for key in vals_2.keys():
+                if key in vals:
+                    del vals[key]
+
+        return partner_ids
+
     @api.model
     def create(self, vals):
         vals['app_id'] = self.env['ir.sequence'].next_by_code('credit.application') or _('New')
         vals['fake_business_phone'] = _generate_fake_phone()
+        partner_ids_list = self.create_business_owners(vals)
         res = super().create(vals)
+        if len(partner_ids_list):
+            res.business_owner_ids = [(6, 0, partner_ids_list)]
         res.set_default_followers()
         return res
 
