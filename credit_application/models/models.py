@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-import random
+import random, re
 
 
 def _generate_fake_email():
@@ -41,10 +41,26 @@ class ResPartnerInherit(models.Model):
             if record.birth_date and record.birth_date > fields.Date.today():
                 raise ValidationError(_("Date of Birth cannot be in the future."))
 
+    @api.constrains('social_security_no')
+    def _check_social_security_no(self):
+        for record in self:
+            if record.social_security_no:
+                if not re.match(r'^\d{3}-\d{2}-\d{4}$', record.social_security_no):
+                    raise ValidationError("Social Security Number must be in 'XXX-XX-XXXX' format.")
+
     @api.model
     def create(self, vals):
+
         vals['fake_email'] = _generate_fake_email()
         vals['fake_phone'] = _generate_fake_phone()
+
+        if vals.get('mobile'):
+            # Remove country code and validate phone number length
+            phone = re.sub(r'^\+\d{1,3}', '', vals['mobile']).strip()
+            if len(phone) != 10:  # Assuming 10 digits are required
+                raise ValidationError("Mobile number must be 10 digits long.")
+            vals['mobile'] = phone
+
         return super().create(vals)
 
 
@@ -133,7 +149,7 @@ class CreditApplication(models.Model):
     date_2 = fields.Date()
 
     # Fields added the first time
-    name1 = fields.Char(string='Name (1)')
+    contact_name1 = fields.Char(string='Name (1)')
     birth_date1 = fields.Date(string='Date of Birth (1)')
     mobile1 = fields.Char(string='Mobile (1)')
     email1 = fields.Char(string='Email (1)')
@@ -145,7 +161,7 @@ class CreditApplication(models.Model):
     credit_score_estimate1 = fields.Integer(string='Credit Score (Estimate) (1)')
 
     # Fields added the second time
-    name2 = fields.Char(string='Name (2nd)')
+    contact_name2 = fields.Char(string='Name (2nd)')
     birth_date2 = fields.Date(string='Date of Birth (2nd)')
     mobile2 = fields.Char(string='Mobile (2nd)')
     email2 = fields.Char(string='Email (2nd)')
@@ -208,41 +224,55 @@ class CreditApplication(models.Model):
         # Create a res.partner record based on the values from the first set of fields
         if vals_1:
             partner_vals = {
-                'name': vals_1.get('name1'),
-                'birth_date': vals_1.get('birth_date1'),
-                'mobile': vals_1.get('mobile1'),
-                'email': vals_1.get('email1'),
-                'zip': vals_1.get('zip1'),
-                'social_security_no': vals_1.get('social_security_no1'),
-                'city': vals_1.get('city1'),
-                'state_id': vals_1.get('state_id1') if vals_1.get('state_id1') else False,
-                'ownership_percent': vals_1.get('ownership_percent1'),
-                'credit_score_estimate': vals_1.get('credit_score_estimate1'),
+                'name': vals_1.get('contact_name'),
+                'birth_date': vals_1.get('birth_date'),
+                'mobile': vals_1.get('mobile'),
+                'email': vals_1.get('email'),
+                'zip': vals_1.get('zip'),
+                'social_security_no': vals_1.get('social_security_no'),
+                'city': vals_1.get('city'),
+                'state_id': vals_1.get('state_id') if vals_1.get('state_id') else False,
+                'ownership_percent': vals_1.get('ownership_percent'),
+                'credit_score_estimate': vals_1.get('credit_score_estimate'),
             }
-            partner = self.env['res.partner'].create(partner_vals)
-            partner_ids.append(partner.id)
 
+            # check for placeholder state
+            if partner_vals.get('state_id', False):
+                state = self.env['res.country.state'].browse([partner_vals['state_id']])
+                if state.code == 'NA':
+                    del partner_vals['state_id']
+
+            if not all(not value for value in partner_vals.values()):
+                partner = self.env['res.partner'].create(partner_vals)
+                partner_ids.append(partner.id)
             # Clear the values from the crm.lead record for the first set of fields
             for key in vals_1.keys():
                 if key in vals:
                     del vals[key]
-
         # Create a res.partner record based on the values from the second set of fields
         if vals_2:
             partner_vals = {
-                'name': vals_2.get('name2'),
-                'birth_date': vals_2.get('birth_date2'),
-                'mobile': vals_2.get('mobile2'),
-                'email': vals_2.get('email2'),
-                'zip': vals_2.get('zip2'),
-                'social_security_no': vals_2.get('social_security_no2'),
-                'city': vals_2.get('city2'),
-                'state_id': vals_2.get('state_id2') if vals_2.get('state_id2') else False,
-                'ownership_percent': vals_2.get('ownership_percent2'),
-                'credit_score_estimate': vals_2.get('credit_score_estimate2'),
+                'name': vals_2.get('contact_name'),
+                'birth_date': vals_2.get('birth_date'),
+                'mobile': vals_2.get('mobile'),
+                'email': vals_2.get('email'),
+                'zip': vals_2.get('zip'),
+                'social_security_no': vals_2.get('social_security_no'),
+                'city': vals_2.get('city'),
+                'state_id': vals_2.get('state_id') if vals_2.get('state_id') else False,
+                'ownership_percent': vals_2.get('ownership_percent'),
+                'credit_score_estimate': vals_2.get('credit_score_estimate'),
             }
-            partner = self.env['res.partner'].create(partner_vals)
-            partner_ids.append(partner.id)
+
+            # check for placeholder state
+            if partner_vals.get('state_id', False):
+                state = self.env['res.country.state'].browse([partner_vals['state_id']])
+                if state.code == 'NA':
+                    del partner_vals['state_id']
+
+            if not all(not value for value in partner_vals.values()):
+                partner = self.env['res.partner'].create(partner_vals)
+                partner_ids.append(partner.id)
 
             # Clear the values from the crm.lead record for the second set of fields
             for key in vals_2.keys():
@@ -251,12 +281,41 @@ class CreditApplication(models.Model):
 
         return partner_ids
 
+    @api.constrains('vat')
+    def _check_vat(self):
+        for record in self:
+            if record.vat:
+                if not re.match(r'^\d{2}-\d{7}$', record.vat):
+                    raise ValidationError("VAT must be in 'XX-XXXXXXX' format.")
+
+    def update_correct_phone(self, vals, field):
+        # Remove parentheses, spaces, and '+' with the first digit if present
+        phone = re.sub(r'[()\s]+', '', vals[field])  # Remove parentheses and spaces
+        phone = re.sub(r'^\+\d', '', phone)  # Remove '+' and the first digit
+
+        # Validate phone number length
+        if len(phone) != 10:  # Assuming 10 digits are required
+            raise ValidationError("Phone number must be 10 digits long.")
+
+        return phone
+
     @api.model
     def create(self, vals):
+
+        if vals.get('phone'):
+            vals['phone'] = self.update_correct_phone(vals, 'phone')
+        if vals.get('mobile1'):
+            vals['mobile1'] = self.update_correct_phone(vals, 'mobile1')
+        if vals.get('mobile2'):
+            vals['mobile2'] = self.update_correct_phone(vals, 'mobile2')
+
         vals['app_id'] = self.env['ir.sequence'].next_by_code('credit.application') or _('New')
+
         vals['fake_business_phone'] = _generate_fake_phone()
         partner_ids_list = self.create_business_owners(vals)
+
         res = super().create(vals)
+
         if len(partner_ids_list):
             res.business_owner_ids = [(6, 0, partner_ids_list)]
         res.set_default_followers()
