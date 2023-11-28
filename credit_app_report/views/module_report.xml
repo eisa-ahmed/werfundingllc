@@ -409,7 +409,7 @@
                                         <td style="width:50% !important; text-align:left !important;">
                                             <span>Business Start Date:</span>
                                             <span style="font-weight:normal !important; color:black !important;"
-                                                  t-esc="o.business_start_date"/>
+                                                  t-esc="o.business_start_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                         </td>
                                         <td style="width:50% !important; text-align:left !important;">
                                             <span>Business Phone:</span>
@@ -699,7 +699,7 @@
                                             <span>Date of Birth:</span>
                                             <t t-if="o.business_owner_ids and len(o.business_owner_ids) &gt;= 1">
                                                 <span style="font-weight:normal !important; color:black !important;"
-                                                      t-esc="o.business_owner_ids[0].birth_date"/>
+                                                      t-esc="o.business_owner_ids[0].birth_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
 
                                             </t>
                                         </td>
@@ -707,7 +707,7 @@
                                             <span>Date of Birth:</span>
                                             <t t-if="o.business_owner_ids and len(o.business_owner_ids) &gt;= 2">
                                                 <span style="font-weight:normal !important; color:black !important;"
-                                                      t-esc="o.business_owner_ids[1].birth_date"/>
+                                                      t-esc="o.business_owner_ids[1].birth_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
 
                                             </t>
                                         </td>
@@ -791,8 +791,8 @@
                                 </t>
 
                                 <span style="margin-left:40px !important; font-weight:bold !important;">Date(1):</span>
-                                <t t-if="o.date_1">
-                                    <span style="text-decoration:underline !important;" t-esc="o.date_1"/>
+                                <t t-if="o.date_1" >
+                                    <span style="text-decoration:underline !important;" t-esc="o.date_1" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                 </t>
                                 <t t-else="">
                                     <span>_______________</span>
@@ -810,7 +810,7 @@
 
                                 <span style="margin-left:40px !important; font-weight:bold !important;">Date(1):</span>
                                 <t t-if="o.date_2">
-                                    <span style="text-decoration:underline !important;" t-esc="o.date_2"/>
+                                    <span style="text-decoration:underline !important;" t-esc="o.date_2" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                 </t>
                                 <t t-else="">
                                     <span>_______________</span>
@@ -1233,7 +1233,7 @@
                                         <td style="width:50% !important; text-align:left !important;">
                                             <span>Business Start Date:</span>
                                             <span style="font-weight:normal !important; color:black !important;"
-                                                  t-esc="o.business_start_date"/>
+                                                  t-esc="o.business_start_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                         </td>
                                         <td style="width:50% !important; text-align:left !important;">
                                             <span>Business Phone:</span>
@@ -1523,7 +1523,7 @@
                                             <span>Date of Birth:</span>
                                             <t t-if="o.business_owner_ids and len(o.business_owner_ids) &gt;= 1">
                                                 <span style="font-weight:normal !important; color:black !important;"
-                                                      t-esc="o.business_owner_ids[0].birth_date"/>
+                                                      t-esc="o.business_owner_ids[0].birth_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
 
                                             </t>
                                         </td>
@@ -1531,7 +1531,7 @@
                                             <span>Date of Birth:</span>
                                             <t t-if="o.business_owner_ids and len(o.business_owner_ids) &gt;= 2">
                                                 <span style="font-weight:normal !important; color:black !important;"
-                                                      t-esc="o.business_owner_ids[1].birth_date"/>
+                                                      t-esc="o.business_owner_ids[1].birth_date" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
 
                                             </t>
                                         </td>
@@ -1616,7 +1616,7 @@
 
                                 <span style="margin-left:40px !important; font-weight:bold !important;">Date(1):</span>
                                 <t t-if="o.date_1">
-                                    <span style="text-decoration:underline !important;" t-esc="o.date_1"/>
+                                    <span style="text-decoration:underline !important;" t-esc="o.date_1" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                 </t>
                                 <t t-else="">
                                     <span>_______________</span>
@@ -1634,7 +1634,7 @@
 
                                 <span style="margin-left:40px !important; font-weight:bold !important;">Date(1):</span>
                                 <t t-if="o.date_2">
-                                    <span style="text-decoration:underline !important;" t-esc="o.date_2"/>
+                                    <span style="text-decoration:underline !important;" t-esc="o.date_2" t-options='{"widget": "date", "format": "MM/dd/yyyy"}'/>
                                 </t>
                                 <t t-else="">
                                     <span>_______________</span>

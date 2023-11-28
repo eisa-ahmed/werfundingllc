@@ -150,6 +150,7 @@ class CreditApplication(models.Model):
 
     # Fields added the first time
     contact_name1 = fields.Char(string='Name (1)')
+    contact_name_last1 = fields.Char(string='Last Name (1)')
     birth_date1 = fields.Date(string='Date of Birth (1)')
     mobile1 = fields.Char(string='Mobile (1)')
     email1 = fields.Char(string='Email (1)')
@@ -157,11 +158,13 @@ class CreditApplication(models.Model):
     city1 = fields.Char(string='City (1)')
     state_id1 = fields.Many2one('res.country.state', string='State (1)')
     zip1 = fields.Char(string='ZIP (1)')
+    business_owner_street1 = fields.Char(string='Street (1)')
     ownership_percent1 = fields.Float(string='% Ownership (1)')
     credit_score_estimate1 = fields.Integer(string='Credit Score (Estimate) (1)')
 
     # Fields added the second time
     contact_name2 = fields.Char(string='Name (2nd)')
+    contact_name_last2 = fields.Char(string='Last Name (2nd)')
     birth_date2 = fields.Date(string='Date of Birth (2nd)')
     mobile2 = fields.Char(string='Mobile (2nd)')
     email2 = fields.Char(string='Email (2nd)')
@@ -169,6 +172,7 @@ class CreditApplication(models.Model):
     city2 = fields.Char(string='City (2nd)')
     state_id2 = fields.Many2one('res.country.state', string='State (2nd)')
     zip2 = fields.Char(string='ZIP (2nd)')
+    business_owner_street2 = fields.Char(string='Street (2)')
     ownership_percent2 = fields.Float(string='% Ownership (2nd)')
     credit_score_estimate2 = fields.Integer(string='Credit Score (Estimate) (2nd)')
 
@@ -225,10 +229,12 @@ class CreditApplication(models.Model):
         if vals_1:
             partner_vals = {
                 'name': vals_1.get('contact_name'),
+                'last_name': vals_1.get('contact_name_last'),
                 'birth_date': vals_1.get('birth_date'),
                 'mobile': vals_1.get('mobile'),
                 'email': vals_1.get('email'),
                 'zip': vals_1.get('zip'),
+                'street': vals_1.get('business_owner_street'),
                 'social_security_no': vals_1.get('social_security_no'),
                 'city': vals_1.get('city'),
                 'state_id': vals_1.get('state_id') if vals_1.get('state_id') else False,
@@ -253,10 +259,12 @@ class CreditApplication(models.Model):
         if vals_2:
             partner_vals = {
                 'name': vals_2.get('contact_name'),
+                'last_name': vals_1.get('contact_name_last'),
                 'birth_date': vals_2.get('birth_date'),
                 'mobile': vals_2.get('mobile'),
                 'email': vals_2.get('email'),
                 'zip': vals_2.get('zip'),
+                'street': vals_1.get('business_owner_street'),
                 'social_security_no': vals_2.get('social_security_no'),
                 'city': vals_2.get('city'),
                 'state_id': vals_2.get('state_id') if vals_2.get('state_id') else False,
