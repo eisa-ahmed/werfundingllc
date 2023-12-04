@@ -148,6 +148,8 @@ class CreditApplication(models.Model):
     ownership_percent1 = fields.Float(string='% Ownership (1)')
     credit_score_estimate1 = fields.Integer(string='Credit Score (Estimate) (1)')
 
+    has_second_owner = fields.Boolean()
+
     # Fields added the second time
     contact_name2 = fields.Char(string='Name (2nd)')
     contact_name_last2 = fields.Char(string='Last Name (2nd)')
