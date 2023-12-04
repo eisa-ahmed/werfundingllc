@@ -41,25 +41,11 @@ class ResPartnerInherit(models.Model):
             if record.birth_date and record.birth_date > fields.Date.today():
                 raise ValidationError(_("Date of Birth cannot be in the future."))
 
-    @api.constrains('social_security_no')
-    def _check_social_security_no(self):
-        for record in self:
-            if record.social_security_no:
-                if not re.match(r'^\d{3}-\d{2}-\d{4}$', record.social_security_no):
-                    raise ValidationError("Social Security Number must be in 'XXX-XX-XXXX' format.")
-
     @api.model
     def create(self, vals):
 
         vals['fake_email'] = _generate_fake_email()
         vals['fake_phone'] = _generate_fake_phone()
-
-        if vals.get('mobile'):
-            # Remove country code and validate phone number length
-            phone = re.sub(r'^\+\d{1,3}', '', vals['mobile']).strip()
-            if len(phone) != 10:  # Assuming 10 digits are required
-                raise ValidationError("Mobile number must be 10 digits long.")
-            vals['mobile'] = phone
 
         return super().create(vals)
 
@@ -248,7 +234,7 @@ class CreditApplication(models.Model):
                 if state.code == 'NA':
                     del partner_vals['state_id']
 
-            if not all(not value for value in partner_vals.values()):
+            if partner_vals.get('name', False):
                 partner = self.env['res.partner'].create(partner_vals)
                 partner_ids.append(partner.id)
             # Clear the values from the crm.lead record for the first set of fields
@@ -278,7 +264,7 @@ class CreditApplication(models.Model):
                 if state.code == 'NA':
                     del partner_vals['state_id']
 
-            if not all(not value for value in partner_vals.values()):
+            if partner_vals.get('name', False):
                 partner = self.env['res.partner'].create(partner_vals)
                 partner_ids.append(partner.id)
 
@@ -289,33 +275,8 @@ class CreditApplication(models.Model):
 
         return partner_ids
 
-    @api.constrains('vat')
-    def _check_vat(self):
-        for record in self:
-            if record.vat:
-                if not re.match(r'^\d{2}-\d{7}$', record.vat):
-                    raise ValidationError("VAT must be in 'XX-XXXXXXX' format.")
-
-    def update_correct_phone(self, vals, field):
-        # Remove parentheses, spaces, and '+' with the first digit if present
-        phone = re.sub(r'[()\s]+', '', vals[field])  # Remove parentheses and spaces
-        phone = re.sub(r'^\+\d', '', phone)  # Remove '+' and the first digit
-
-        # Validate phone number length
-        if len(phone) != 10:  # Assuming 10 digits are required
-            raise ValidationError("Phone number must be 10 digits long.")
-
-        return phone
-
     @api.model
     def create(self, vals):
-
-        if vals.get('phone'):
-            vals['phone'] = self.update_correct_phone(vals, 'phone')
-        if vals.get('mobile1'):
-            vals['mobile1'] = self.update_correct_phone(vals, 'mobile1')
-        if vals.get('mobile2'):
-            vals['mobile2'] = self.update_correct_phone(vals, 'mobile2')
 
         vals['app_id'] = self.env['ir.sequence'].next_by_code('credit.application') or _('New')
 

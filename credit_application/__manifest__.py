@@ -22,5 +22,12 @@
         'views/view_funds.xml',
         'wizard/wizard.xml'
     ],
-    'application': True
+    'application': True,
+    'assets': {
+        'web.assets_frontend': [
+            'credit_application/static/src/js/fields_validation.js',
+            'credit_application/static/src/js/submit_control.js',
+            'credit_application/static/src/js/dynamic_required_fields.js'
+        ]
+    }
 }
