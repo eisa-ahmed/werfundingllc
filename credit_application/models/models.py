@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-import random, re
+import random
 
 
 def _generate_fake_email():
@@ -18,6 +18,7 @@ def _generate_fake_phone():
 class ResPartnerInherit(models.Model):
     _inherit = 'res.partner'
 
+    funder_number = fields.Char(string='Funder Number', copy=False)
     business_owner = fields.Boolean(string='Is Business Owner?')
     credit_application_id = fields.Many2one('credit.application', string='Company')
     last_name = fields.Char(string='Last Name')
@@ -46,6 +47,7 @@ class ResPartnerInherit(models.Model):
 
         vals['fake_email'] = _generate_fake_email()
         vals['fake_phone'] = _generate_fake_phone()
+        vals['funder_number'] = self.env['ir.sequence'].next_by_code('res.partner.funder') or _('New')
 
         return super().create(vals)
 
@@ -310,5 +312,4 @@ class CreditFund(models.Model):
     _description = 'Credit Fund'
 
     name = fields.Char(string="Name", required=True)
-    email = fields.Char(string="Email", required=True)
     contact_ids = fields.Many2many('res.partner', string="Contacts")

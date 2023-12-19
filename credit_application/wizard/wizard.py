@@ -21,7 +21,7 @@ class FundWizard(models.TransientModel):
     credit_card_statements = fields.Boolean(string="Credit Card Statements")
     miscellaneous = fields.Boolean(string="Miscellaneous")
 
-    def generate_application_pdf(self, app_id_ref):
+    def generate_application_pdf(self, app_id_ref, funder_no):
         company_name = self.credit_application_id.name
         app_id = self.credit_application_id.app_id
         file_name = f"{company_name}-{app_id}.pdf"
@@ -29,7 +29,7 @@ class FundWizard(models.TransientModel):
         report_id = self.env.ref(app_id_ref).id
         report = self.env['ir.actions.report'].browse(report_id)
 
-        pdf_data, _ = self.env.ref(app_id_ref)._render_qweb_pdf(report.id,
+        pdf_data, _ = self.env.ref(app_id_ref).with_context({'funder_unique_no': funder_no})._render_qweb_pdf(report.id,
                                              [self.credit_application_id.id])
         # Create a new attachment record with the PDF data
         attachment = self.env['ir.attachment'].create({
@@ -48,11 +48,6 @@ class FundWizard(models.TransientModel):
 
         applications = []
 
-        if self.in_house:
-            applications += self.generate_application_pdf('credit_app_report.credit_app_report_id')
-        if self.external:
-            applications += self.generate_application_pdf('credit_app_report.credit_app_report_fake')
-
         if self.applications:
             applications += credit_application_id.attachment_application_ids
         if self.bank_statement:
@@ -70,7 +65,7 @@ class FundWizard(models.TransientModel):
         if self.miscellaneous:
             applications += credit_application_id.attachment_misc_ids
 
-        if not len(applications):
+        if not len(applications) and not self.in_house and not self.external:
             raise ValidationError(_("Please select attachment options for Submission."))
 
         all_attachment_ids = [att.id for att in applications]
@@ -89,19 +84,31 @@ class FundWizard(models.TransientModel):
         if not self.env.context.get('app_submission', False):
             message_body = ''
             for fund in self.fund_ids:
-                email_cc = ', '.join(fund.contact_ids.mapped('email'))
-                mail_values = {
-                    'subject': subject,
-                    'body_html': body,
-                    'email_from': 'submissions@werfundingllc.com',
-                    'email_to': fund.email,
-                    'email_cc': email_cc,
-                    'reply_to': 'submissions@werfundingllc.com'
-                }
+                for funder in fund.contact_ids:
+                    mail_values = {
+                        'subject': subject,
+                        'body_html': body,
+                        'email_from': 'submissions@werfundingllc.com',
+                        'email_to': funder.email,
+                        'reply_to': 'submissions@werfundingllc.com'
+                    }
 
-                mail = Mail.create(mail_values)
-                mail.unrestricted_attachment_ids = [(6, 0, attachment_ids)]
-                mail.send()
+                    mail = Mail.create(mail_values)
+
+                    pop_count = 0
+                    if self.in_house:
+                        attachment_ids.append(self.generate_application_pdf('credit_app_report.credit_app_report_id', funder.funder_number).id)
+                        pop_count += 1
+                    if self.external:
+                        attachment_ids.append(self.generate_application_pdf('credit_app_report.credit_app_report_fake', funder.funder_number).id)
+                        pop_count += 1
+
+                    mail.unrestricted_attachment_ids = [(6, 0, attachment_ids)]
+                    mail.send()
+
+                    if pop_count:
+                        for i in range(pop_count):
+                            attachment_ids.pop()
 
                 # Create an unordered list of names with HTML line breaks
                 names = fund.contact_ids.mapped('name')

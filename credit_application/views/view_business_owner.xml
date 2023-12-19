@@ -1,6 +1,17 @@
 <odoo>
     <data>
 
+        <record id="view_res_partner_form_inherited" model="ir.ui.view">
+            <field name="name">res.partner.form.inherited</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="funder_number" readonly="1" force_save="1" string="Funder No"/>
+                </xpath>
+            </field>
+        </record>
+
         <!-- Business Owners Tree View -->
         <record id="view_res_partner_business_owner_tree" model="ir.ui.view">
             <field name="name">res.partner.business.owner.tree</field>

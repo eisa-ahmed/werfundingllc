@@ -6,5 +6,10 @@
             <field name="code">credit.application</field>
             <field name="padding">4</field>
         </record>
+        <record id="seq_funder_no" model="ir.sequence">
+            <field name="name">Funder No</field>
+            <field name="code">res.partner.funder</field>
+            <field name="padding">4</field>
+        </record>
     </data>
 </odoo>
